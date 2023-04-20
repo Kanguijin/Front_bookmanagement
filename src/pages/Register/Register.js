@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import LoginInput from '../../components/UI/Login/LoginInput/LoginInput';
 import { FiUser, FiLock } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { BiRename } from 'react-icons/bi';
@@ -87,6 +87,8 @@ const errorMsg = css`
 `;
 
 const Register = () => {
+    const navigate = useNavigate();
+
     const [registerUser, setRegisterUser] = useState({email: "", passowrd:"", name:""});
     const [errorMessages, setErrorMessages] = useState({email: "", password:"", name:""});
 
@@ -105,9 +107,10 @@ const Register = () => {
             }
         }
         try {
-            const response = await axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option); // await은 async함수 안에서만 쓸 수 있다. 
+            await axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option); // await은 async함수 안에서만 쓸 수 있다. 
             setErrorMessages({email: "", password:"", name:""});
-           
+            alert("회원가입 성공!")
+            navigate("/login")
         } catch(error) {
             setErrorMessages({email: "", password:"", name:"", ...error.response.data.errorData});
         }
