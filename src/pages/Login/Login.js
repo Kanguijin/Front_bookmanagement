@@ -7,8 +7,9 @@ import { css } from "@emotion/react";
 import { BsGoogle } from 'react-icons/bs';
 import { SiNaver, SiKakao } from 'react-icons/si';
 import axios from 'axios';
-import { authenticated } from '../../index';
+import { authenticatedState } from '../../atoms/Auth/AuthAtoms';
 import { useRecoilState } from 'recoil';
+
 
 
 const container = css`
@@ -128,7 +129,8 @@ const Login = () => {
 
     const [loginUser, setLoginUser] = useState({email:"", password:""});
     const [ errorMessages, setErrorMessages] = useState({email:"", password:""});
-    const [auth, setAuth] = useRecoilState(authenticated);
+    const [authenticated, setAuthenticated ] = useRecoilState(authenticatedState);
+    
     const navigate = useNavigate();
 
     const onChangeHandle = (e) => {
@@ -148,11 +150,10 @@ const Login = () => {
             setErrorMessages({email: "", password:""});
             const accessToken = response.data.grantType + " " + response.data.accessToken;
             localStorage.setItem("accessToken", accessToken);
-            setAuth(true);
+            setAuthenticated(true);
             navigate("/");
 
        } catch(error) {
-            console.log(error);
             setErrorMessages({email: "", password:"",...error.response.data.errorData});
        }
     }
