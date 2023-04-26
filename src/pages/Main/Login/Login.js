@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LoginInput from '../../components/UI/Login/LoginInput/LoginInput';
+import LoginInput from '../../../components/UI/Login/LoginInput/LoginInput';
 import { FiUser, FiLock } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 /** @jsxImportSource @emotion/react */
@@ -7,7 +7,7 @@ import { css } from "@emotion/react";
 import { BsGoogle } from 'react-icons/bs';
 import { SiNaver, SiKakao } from 'react-icons/si';
 import axios from 'axios';
-import { refreshState } from '../../atoms/Auth/AuthAtoms';
+import { refreshState } from '../../../atoms/Auth/AuthAtoms';
 import { useRecoilState } from 'recoil';
 
 
@@ -151,7 +151,7 @@ const Login = () => {
             setErrorMessages({email: "", password:""});
             const accessToken = response.data.grantType + " " + response.data.accessToken;
             localStorage.setItem("accessToken", accessToken);
-            SetRefresh(true);
+            SetRefresh(false);
             navigate("/");
 
        } catch(error) {
