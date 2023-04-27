@@ -94,7 +94,6 @@ const footer = css`
 `;
 const Sidebar = () => {
     const [ isOpen, setIsOpen ] = useState(false);
-
     const { data, isLoading } = useQuery(["principal"], async () => {
         const accessToken = localStorage.getItem("accessToken");
         const response = await axios.get("http://localhost:8080/auth/principal", 
