@@ -6,6 +6,7 @@ import BookCard from '../../components/UI/BookCard/BookCard';
 import axios from "axios";
 import { useQuery } from "react-query";
 import { BsMenuDown } from "react-icons/bs";
+import QueryString from "qs";
 
 
 const mainContainer = css`
@@ -68,10 +69,10 @@ const searchInput = css`
 const Main = () => {
     const [ searchParam, setSearchParam ] = useState({page: 1, searchValue: "", categoryIds: []});
     const [ refresh, setRefresh ] = useState(false);
-    const [books, setBooks] = useState([]);
-    const [ lastPage, setLastPage] = useState(1);
     const [ categoryRefresh, setCategoryRefresh] = useState(true);
     const [ isOpen, setIsOpen ] = useState(false);
+    const [books, setBooks] = useState([]);
+    const [ lastPage, setLastPage] = useState(1);
     const lastBookRef = useRef(); 
     const categoryButtonRef = useRef();
 
@@ -92,7 +93,8 @@ const Main = () => {
         params:searchParam,
         headers: {
             Authorization: localStorage.getItem("accessToken")
-        }
+        },
+        paramsSerializer: params => QueryString.stringify(params, {arrayFormat: 'repeat'})
     }
     // async를 달면 프로미스가 됨. 
     const searchBooks = useQuery(["searchBooks"], async () => {
@@ -143,11 +145,12 @@ const Main = () => {
 
     const categoryCheckHandle = (e) => {
         if(e.target.checked) {
-            setSearchParam({...searchParam, categoryIds: [...searchParam.categoryIds, e.target.value]});
-        } else {
-            setSearchParam({...searchParam, categoryIds:[...searchParam.categoryIds.filter(id => id !== e.target.value)]});
+            setSearchParam({...searchParam, page: 1, categoryIds: [...searchParam.categoryIds, e.target.value]});
+        }else {
+            setSearchParam({...searchParam, page: 1, categoryIds: [...searchParam.categoryIds.filter(id => id !== e.target.value)]});
         }
-        
+        setBooks([]);
+        setRefresh(true);
     };
 
     const searchInputHandle = (e) => {
