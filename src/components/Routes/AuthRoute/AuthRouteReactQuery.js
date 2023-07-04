@@ -5,43 +5,26 @@ import { Navigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { refreshState } from '../../../atoms/Auth/AuthAtoms';
 
-
+// 새 창을 열었을 때나 새로고침한 경우에 토큰인증을 해주기 위해서
 const AuthRouteReactQuery = ({ path,element }) => {
     const [refresh, setRefresh] = useRecoilState(refreshState); 
-    const [{data:authenticated, isLoading: authIsLoading}, {data:principal}] = useQueries([
-        {
-            queryKey: ["authenticated"],
-            queryFn: async () => {
-                const accessToken = localStorage.getItem("accessToken");
-                const response = await axios.get("http://localhost:8080/auth/authenticated", {params:{accessToken}});
-                return response;
-            },
-            suspense: true
-        }, {
-            queryKey: ["authenticated"],
-            queryFn: async () => {
-                const accessToken = localStorage.getItem("accessToken");
-                const response = await axios.get("http://localhost:8080/auth/principal", {params:{accessToken}})
-                return response;
-            },
-            suspense: true
-        }
-    ]);
-    // const { data, isLoading } = useQuery(["authenticated"], async () => {
-    //     const accessToken = localStorage.getItem("accessToken");
-    //     const response = await axios.get("http://localhost:8080/auth/authenticated", {params:{accessToken}});
-    //     return response;
-    // }, {
-    //     enabled: refresh
-    // });
+    const { data, isLoading } = useQuery(["authenticated"], async () => {
+        const accessToken = localStorage.getItem("accessToken");
+        const response = await axios.get("http://localhost:8080/auth/authenticated", {params:{accessToken}});
+        return response;
+    }, {
+        enabled: refresh
+    });
 
-    // const principal = useQuery(["principal"], async () => {
-    //     const accessToken = localStorage.getItem("accessToken");
-    //     const response = await axios.get("http://localhost:8080/auth/principal", {params:{accessToken}})
-    //     return response;
-    // },{
-    //     enabled: refr
-    // });
+    // 키 값을 배열에 넣어주는 것이 정석. 키 값 여러개 가능
+    const principal = useQuery(["principal"], async () => {
+        const accessToken = localStorage.getItem("accessToken");
+        // 해당 값이 fresh 한지 안한지 체크. 받은 값이 다르면 상태를 바꾸어 재랜더링해준다.-> 자동
+        const response = await axios.get("http://localhost:8080/auth/principal", {params:{accessToken}})
+        return response;
+    },{
+        enabled: !!localStorage.getItem("accessToken")
+    });
 
     useEffect(()=> {
         if(!refresh) {
@@ -49,7 +32,8 @@ const AuthRouteReactQuery = ({ path,element }) => {
         }
     }, [refresh]);
 
-    if(authenticated.isLoading) {
+    //  로딩
+    if(isLoading) {
         return (<div>로딩중...</div>)
     }
 
@@ -60,14 +44,20 @@ const AuthRouteReactQuery = ({ path,element }) => {
             return <Navigate to="/" />
         }
     }
-    if(!authenticated.isLoading) {
+
+    // 로딩이 끝난 지점.
+    if(!isLoading) {
         const permitAll = ["/login","/register","/password/forgot"];
-        if(!authenticated.data.data) {
+
+        // 인증이 안된 상태 -> 로그인으로 보냄
+        if(!data.data) {
             if(permitAll.includes(path)) {
                 return element;
             }
             return <Navigate to="/login" />;
         }
+
+        // 로그인이 된 상태에서 permitAll에 포함된 주소-> 홈
         if(permitAll.includes(path)) {
             return <Navigate to="/" />;
         }
@@ -75,12 +65,7 @@ const AuthRouteReactQuery = ({ path,element }) => {
         return element;
     }
 
-    
-    // if(permitAll.includes(path)) {
-    //     return <Navigate to="/" />;
-    // }
-    
-    
+    return element;    
 };
 
 
